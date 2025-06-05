@@ -126,8 +126,3 @@ curl -X POST http://localhost:8000/api/final-quiz/ \
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Contact
-
-Your Name - your.email@example.com
-
-Project Link: [https://github.com/yourusername/SALS](https://github.com/yourusername/SALS) 
