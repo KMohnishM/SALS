@@ -9,11 +9,11 @@ env/
 # IDEs
 .vscode/
 .idea/
-
+.env
 # OS files
 .DS_Store
 Thumbs.db
-*.zoneidentifier
+*.Zoneidentifier
 
 # Logs
 *.log
