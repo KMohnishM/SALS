@@ -1,0 +1,28 @@
+# Bytecode cache
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+env/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.zoneidentifier
+
+# Logs
+*.log
+
+# Python test coverage
+htmlcov/
+.coverage
+.pytest_cache/
+.tox/
+
+# Jupyter
+.ipynb_checkpoints/
