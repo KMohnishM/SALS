@@ -1,1 +1,5 @@
-_pycache_
+# Python bytecode
+__pycache__/
+
+# Windows Zone Identifier
+*.zoneidentifier
