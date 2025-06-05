@@ -73,25 +73,37 @@ Return as a pure JSON array:
 No markdown. No extra text.
 """
 
-def generate_final_quiz_prompt(topic, weak_concepts):
-    weak = ", ".join(weak_concepts)
+def generate_final_quiz_prompt(topic, weak_concepts, initial_weak_concepts):
     return f"""
-You are designing a final reinforcement quiz on the DSA topic "{topic}".
-
-Guidelines:
-- 6 medium-level MCQs from these weak concepts: {weak}
-- 4 hard-level MCQs from other key concepts in "{topic}"
-- Each MCQ must include: question, options (A–D), correct answer (A/B/C/D), difficulty, and concept
-
-Return as a *pure JSON array*. No markdown, no explanation.
-[
-  {{
-    "question": "...",
-    "options": ["A", "B", "C", "D"],
-    "answer": "A",
-    "difficulty": "medium",
-    "concept": "..."
-  }},
-  ...
-]
-"""
+    Generate a final assessment quiz for the topic "{topic}" that focuses on reinforcement learning and measuring improvement.
+    
+    The student previously struggled with these concepts: {initial_weak_concepts}
+    They have been working on improving these areas: {weak_concepts}
+    
+    Create a quiz that:
+    1. Primarily tests the previously weak concepts to measure improvement
+    2. Includes some new, related concepts to assess broader understanding
+    3. Has questions of varying difficulty levels
+    4. Focuses on practical application rather than just theory
+    
+    Format the response as a JSON object with this structure:
+    {{
+        "title": "Final Assessment Quiz - [Topic]",
+        "description": "This quiz measures your improvement and understanding after the learning path",
+        "questions": [
+            {{
+                "id": 1,
+                "question": "Question text",
+                "options": ["A", "B", "C", "D"],
+                "correct_answer": "Correct option",
+                "explanation": "Detailed explanation of the correct answer",
+                "concept_tested": "Specific concept being tested",
+                "difficulty": "easy/medium/hard",
+                "is_reinforcement": true/false  // Whether this question tests a previously weak concept
+            }}
+        ]
+    }}
+    
+    Include at least 5 questions, with at least 3 focusing on previously weak concepts.
+    Make sure the questions are challenging but fair, and provide clear explanations.
+    """

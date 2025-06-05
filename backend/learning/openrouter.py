@@ -10,7 +10,7 @@ def call_openrouter(prompt, model="deepseek/deepseek-r1-0528-qwen3-8b:free"):
         "HTTP-Referer": "https://yourdomain.com",
         "X-Title": "SALS Assistant"
     }
-    
+    print(os.getenv('OPENROUTER_API_KEY'))
     data = {
         "model": model,
         "messages": [
