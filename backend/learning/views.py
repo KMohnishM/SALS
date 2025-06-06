@@ -34,6 +34,7 @@ def generate_quiz(request):
 
     except (KeyError, json.JSONDecodeError) as e:
         return JsonResponse({"error": f"Invalid API response or JSON parsing error: {str(e)}", "response": result}, status=500)
+
 @csrf_exempt
 def analyze_quiz(request):
     if request.method != "POST":
@@ -44,6 +45,7 @@ def analyze_quiz(request):
         quiz_id = data.get("quiz_id")
         user_answers = data.get("user_answers", [])
 
+        # Get the existing quiz
         quiz = Quiz.objects.get(id=quiz_id)
         questions = quiz.questions
 
@@ -52,9 +54,9 @@ def analyze_quiz(request):
         raw = result['choices'][0]['message']['content']
         weak_concepts = json.loads(raw.strip().replace("```json", "").replace("```", ""))
 
-        # Save the quiz attempt
+        # Save the quiz attempt using the existing quiz
         quiz_attempt = UserQuizAttempt.objects.create(
-            quiz=quiz,
+            quiz=quiz,  # Use the existing quiz
             user_answers=user_answers,
             weak_concepts=weak_concepts
         )
@@ -167,14 +169,17 @@ def submit_final_quiz(request):
     try:
         data = json.loads(request.body)
         quiz_id = data.get("quiz_id")
-        user_answers = data.get("user_answers", [])
+        user_answers = data.get("user_answers")
+
+        if not quiz_id:
+            return JsonResponse({"error": "Quiz ID is required"}, status=400)
 
         quiz = Quiz.objects.get(id=quiz_id)
         
         # Save the final quiz attempt
         quiz_attempt = UserQuizAttempt.objects.create(
             quiz=quiz,
-            user_answers=user_answers
+            user_answers=user_answers if user_answers else []  # Ensure we always have a valid value
         )
 
         # Get progress and initial attempt
@@ -182,7 +187,7 @@ def submit_final_quiz(request):
         initial_attempt = progress.initial_quiz_attempt
 
         # Analyze final performance
-        prompt = generate_analysis_prompt(quiz.questions, user_answers)
+        prompt = generate_analysis_prompt(quiz.questions, user_answers if user_answers else [])
         result = call_openrouter(prompt)
         raw = result['choices'][0]['message']['content']
         final_weak_concepts = json.loads(raw.strip().replace("```json", "").replace("```", ""))
@@ -238,4 +243,18 @@ def submit_final_quiz(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)})
+
+@csrf_exempt
+def get_quiz_attempt(request, attempt_id):
+    try:
+        attempt = UserQuizAttempt.objects.get(id=attempt_id)
+        return JsonResponse({
+            "quiz_id": attempt.quiz.id,
+            "user_answers": attempt.user_answers,
+            "weak_concepts": attempt.weak_concepts
+        })
+    except UserQuizAttempt.DoesNotExist:
+        return JsonResponse({"error": "Quiz attempt not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
     

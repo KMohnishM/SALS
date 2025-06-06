@@ -9,6 +9,7 @@ An intelligent learning system that uses AI to generate personalized quizzes, an
 - Endpoint: `GET /api/generate-quiz/?topic=<topic_name>`
 - Returns a structured quiz with questions and answers
 - Questions include difficulty levels and concept mapping
+- Persistent storage of quiz attempts and user progress
 
 ### 2. Performance Analysis
 - Analyze quiz responses to identify weak areas
@@ -18,6 +19,7 @@ An intelligent learning system that uses AI to generate personalized quizzes, an
   - List of weak concepts that need improvement
   - Detailed performance metrics
   - Concept-specific analysis
+  - Quiz attempt tracking with unique IDs
 
 ### 3. Personalized Learning Path
 - Generate custom learning paths based on weak concepts
@@ -28,6 +30,7 @@ An intelligent learning system that uses AI to generate personalized quizzes, an
   - Practice exercises
   - Concept-specific recommendations
   - Progress tracking
+  - Persistent storage of learning paths
 
 ### 4. Reinforcement Learning & Final Assessment
 - Generate a final quiz focusing on previously weak areas
@@ -38,6 +41,7 @@ An intelligent learning system that uses AI to generate personalized quizzes, an
   - Mix of reinforcement and new concept questions
   - Varying difficulty levels
   - Detailed explanations
+  - Progress comparison with initial assessment
 
 ### 5. Progress Tracking & Improvement Analysis
 - Submit final quiz and get comprehensive feedback
@@ -50,6 +54,16 @@ An intelligent learning system that uses AI to generate personalized quizzes, an
   - New areas of weakness
   - Detailed feedback and recommendations
   - Personalized study suggestions
+  - Historical performance tracking
+
+### 6. Quiz Attempt Management
+- Track all quiz attempts with unique IDs
+- Endpoint: `GET /api/quiz-attempt/<attempt_id>/`
+- Features:
+  - Persistent storage of user answers
+  - Progress tracking across multiple attempts
+  - Comparison of performance over time
+  - Local storage integration for seamless user experience
 
 ## Project Structure
 
@@ -64,7 +78,44 @@ SALS/
 │   │   └── openrouter.py # AI integration
 │   ├── manage.py         # Django management script
 │   └── db.sqlite3        # SQLite database
+├── frontend/
+│   ├── src/
+│   │   ├── pages/        # React components
+│   │   │   ├── Quiz.jsx  # Quiz interface
+│   │   │   ├── Analytics.jsx # Performance analysis
+│   │   │   └── LearningPath.jsx # Learning path view
+│   │   └── components/   # Reusable components
+│   └── public/           # Static files
 ```
+
+## Data Models
+
+### Quiz
+- Topic association
+- Questions and answers
+- Creation timestamp
+- Final quiz flag
+
+### UserQuizAttempt
+- Quiz reference
+- User answers
+- Score tracking
+- Weak concepts identification
+- Completion timestamp
+
+### LearningPath
+- Weak concepts tracking
+- Learning materials
+- Creation timestamp
+- Completion status
+
+### UserProgress
+- Topic tracking
+- Initial quiz attempt reference
+- Learning path reference
+- Final quiz attempt reference
+- Progress percentage
+- Last update timestamp
 
 ## Prerequisites
 
@@ -72,6 +123,7 @@ SALS/
 - pip (Python package manager)
 - Virtual environment (recommended)
 - OpenRouter API key
+- Node.js and npm (for frontend)
 
 ## Installation
 
@@ -81,16 +133,18 @@ git clone <repository-url>
 cd SALS
 ```
 
-2. Create and activate a virtual environment (recommended):
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
+2. Backend Setup:
 ```bash
 cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
+```
+
+3. Frontend Setup:
+```bash
+cd frontend
+npm install
 ```
 
 4. Set up environment variables:
@@ -102,77 +156,57 @@ HTTP_REFERER=http://localhost:8000
 
 5. Run migrations:
 ```bash
+cd backend
 python manage.py migrate
 ```
 
-6. Start the development server:
+6. Start the development servers:
+
+Backend:
 ```bash
+cd backend
 python manage.py runserver
 ```
 
-The server will start at `http://127.0.0.1:8000/`
-
-## API Usage Examples
-
-### Generate a Quiz
+Frontend:
 ```bash
-curl "http://localhost:8000/api/generate-quiz/?topic=Graphs"
+cd frontend
+npm start
 ```
 
-### Analyze Quiz Results
-```bash
-curl -X POST http://localhost:8000/api/analyze-quiz/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "quiz_id": "1",
-    "user_answers": [
-      {"question_id": 1, "answer": "A"},
-      {"question_id": 2, "answer": "B"}
-    ]
-  }'
-```
+The backend server will run at `http://127.0.0.1:8000/` and the frontend at `http://localhost:3000`
 
-### Get Learning Path
-```bash
-curl -X POST http://localhost:8000/api/learning-path/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "quiz_attempt_id": "1",
-    "weak_concepts": ["concept1", "concept2"]
-  }'
-```
+## Recent Updates
 
-### Generate Final Quiz
-```bash
-curl -X POST http://localhost:8000/api/final-quiz/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "topic": "Graphs",
-    "weak_concepts": ["concept1", "concept2"]
-  }'
-```
+1. Quiz Management
+   - Fixed quiz ID generation to prevent duplicate IDs
+   - Added persistent storage of quiz attempts
+   - Improved error handling for quiz submissions
 
-### Submit Final Quiz
-```bash
-curl -X POST http://localhost:8000/api/submit-final-quiz/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "quiz_id": "2",
-    "user_answers": [
-      {"question_id": 1, "answer": "A"},
-      {"question_id": 2, "answer": "B"}
-    ]
-  }'
-```
+2. User Progress Tracking
+   - Added local storage integration for user answers
+   - Implemented quiz attempt history
+   - Enhanced progress tracking across sessions
+
+3. Analytics Improvements
+   - Added detailed performance metrics
+   - Implemented concept-specific analysis
+   - Enhanced feedback generation
+
+4. Frontend Enhancements
+   - Added responsive UI components
+   - Improved error handling
+   - Enhanced user feedback
+   - Added progress persistence
 
 ## Development
 
-- Built with Django REST framework
+- Built with Django REST framework and React
 - Uses OpenRouter for AI-powered features
 - Implements custom prompt engineering for optimal learning outcomes
 - RESTful API design with JSON responses
 - Focuses on reinforcement learning and continuous improvement
-
+- Implements persistent storage and session management
 
 ## License
 

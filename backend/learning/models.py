@@ -21,7 +21,7 @@ class Quiz(models.Model):
 
 class UserQuizAttempt(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    user_answers = models.JSONField()  # Stores user's answers
+    user_answers = models.JSONField(null=True, blank=True)  # Allow null values
     score = models.FloatField(null=True, blank=True)
     weak_concepts = models.JSONField(null=True, blank=True)  # Stores identified weak concepts
     completed_at = models.DateTimeField(auto_now_add=True)
