@@ -16,7 +16,12 @@ import {
   ListItemText,
   Divider,
   Alert,
+  Card,
+  CardContent,
+  Grid,
 } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import axios from 'axios';
 
 const Quiz = () => {
@@ -26,6 +31,7 @@ const Quiz = () => {
   const [topic, setTopic] = useState('');
   const [error, setError] = useState(null);
   const [analysis, setAnalysis] = useState(null);
+  const [score, setScore] = useState(null);
 
   const generateQuiz = async () => {
     try {
@@ -69,6 +75,16 @@ const Quiz = () => {
       });
       console.log('Quiz analysis:', response.data);
       
+      // Calculate score using the correct answers from quiz state
+      const totalQuestions = quiz.questions.length;
+      const correctCount = quiz.questions.reduce((count, question, index) => {
+        // Extract just the letter from the selected answer (e.g., "B. n-1" -> "B")
+        const selectedLetter = selectedAnswers[index]?.split('.')[0]?.trim();
+        return selectedLetter === question.answer ? count + 1 : count;
+      }, 0);
+      const calculatedScore = (correctCount / totalQuestions) * 100;
+      setScore(calculatedScore);
+      
       // Store quiz attempt ID and weak concepts in localStorage
       if (response.data.quiz_attempt_id) {
         localStorage.setItem('lastQuizAttemptId', response.data.quiz_attempt_id);
@@ -97,10 +113,10 @@ const Quiz = () => {
     setError(null);
   };
 
-  // Debug render
   console.log('Current quiz state:', quiz);
   console.log('Current loading state:', loading);
   console.log('Current error state:', error);
+  console.log('Current selected answers:', selectedAnswers);
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
@@ -179,9 +195,57 @@ const Quiz = () => {
         {analysis && (
           <Box sx={{ mt: 4 }}>
             <Typography variant="h5" gutterBottom>
-              Quiz Analysis
+              Quiz Results
             </Typography>
-            
+
+            <Card sx={{ mb: 4, bgcolor: 'background.default' }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Your Score: {score?.toFixed(1)}%
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  {score >= 70 ? 'Great job! ' : 'Keep practicing! '}
+                </Typography>
+              </CardContent>
+            </Card>
+
+            <Typography variant="h6" gutterBottom>
+              Question Review
+            </Typography>
+
+            {quiz.questions.map((question, index) => {
+              const selectedLetter = selectedAnswers[index]?.split('.')[0]?.trim();
+              const isCorrect = selectedLetter === question.answer;
+              return (
+                <Box key={index} sx={{ mb: 3 }}>
+                  <Paper elevation={1} sx={{ p: 2, bgcolor: isCorrect ? '' : '' }}>
+                    <Grid container alignItems="center" spacing={1}>
+                      <Grid item>
+                        {isCorrect ? (
+                          <CheckCircleIcon color="success" />
+                        ) : (
+                          <CancelIcon color="error" />
+                        )}
+                      </Grid>
+                      <Grid item xs>
+                        <Typography variant="subtitle1">
+                          Question {index + 1}: {question.question}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Your answer: {selectedAnswers[index]}
+                        </Typography>
+                        {!isCorrect && question.answer && (
+                          <Typography variant="body2" color="text.secondary">
+                            Correct answer: {question.options.find(opt => opt.startsWith(question.answer + '.'))}
+                          </Typography>
+                        )}
+                      </Grid>
+                    </Grid>
+                  </Paper>
+                </Box>
+              );
+            })}
+
             <Alert severity="info" sx={{ mb: 3 }}>
               Based on your performance, here are the concepts you should focus on:
             </Alert>
@@ -205,7 +269,6 @@ const Quiz = () => {
                 variant="contained"
                 color="primary"
                 onClick={() => {
-                  // Navigate to learning path
                   window.location.href = '/learning-path';
                 }}
               >
