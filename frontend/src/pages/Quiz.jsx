@@ -78,8 +78,8 @@ const Quiz = () => {
       // Calculate score using the correct answers from quiz state
       const totalQuestions = quiz.questions.length;
       const correctCount = quiz.questions.reduce((count, question, index) => {
-        // Extract just the letter from the selected answer (e.g., "B. n-1" -> "B")
-        const selectedLetter = selectedAnswers[index]?.split('.')[0]?.trim();
+        // Extract just the letter from the selected answer (e.g., "B) Binary Search" -> "B")
+        const selectedLetter = selectedAnswers[index]?.split(')')[0]?.trim();
         return selectedLetter === question.answer ? count + 1 : count;
       }, 0);
       const calculatedScore = (correctCount / totalQuestions) * 100;
@@ -214,11 +214,22 @@ const Quiz = () => {
             </Typography>
 
             {quiz.questions.map((question, index) => {
-              const selectedLetter = selectedAnswers[index]?.split('.')[0]?.trim();
+              // Extract just the letter from the selected answer (e.g., "B) Binary Search" -> "B")
+              const selectedLetter = selectedAnswers[index]?.split(')')[0]?.trim();
               const isCorrect = selectedLetter === question.answer;
+              
+              // Find the full correct answer text
+              const correctAnswerText = question.options.find(opt => 
+                opt.startsWith(question.answer + ')') || opt.startsWith(question.answer + '.')
+              );
+
               return (
                 <Box key={index} sx={{ mb: 3 }}>
-                  <Paper elevation={1} sx={{ p: 2, bgcolor: isCorrect ? '' : '' }}>
+                  <Paper elevation={1} sx={{ 
+                    p: 2, 
+                    borderLeft: `4px solid ${isCorrect ? '#4caf50' : '#f44336'}`,
+                    bgcolor: isCorrect ? '' : ''
+                  }}>
                     <Grid container alignItems="center" spacing={1}>
                       <Grid item>
                         {isCorrect ? (
@@ -228,15 +239,15 @@ const Quiz = () => {
                         )}
                       </Grid>
                       <Grid item xs>
-                        <Typography variant="subtitle1">
+                        <Typography variant="subtitle1" gutterBottom>
                           Question {index + 1}: {question.question}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
                           Your answer: {selectedAnswers[index]}
                         </Typography>
-                        {!isCorrect && question.answer && (
-                          <Typography variant="body2" color="text.secondary">
-                            Correct answer: {question.options.find(opt => opt.startsWith(question.answer + '.'))}
+                        {!isCorrect && (
+                          <Typography variant="body2" color="success.main">
+                            Correct answer: {correctAnswerText || question.answer}
                           </Typography>
                         )}
                       </Grid>
@@ -251,34 +262,29 @@ const Quiz = () => {
             </Alert>
 
             <List>
-              {analysis.weak_concepts && analysis.weak_concepts.map((concept, index) => (
+              {analysis.weak_concepts?.map((concept, index) => (
                 <React.Fragment key={index}>
                   <ListItem>
-                    <ListItemText 
-                      primary={concept}
-                      secondary="This concept needs more practice"
-                    />
+                    <ListItemText primary={concept} />
                   </ListItem>
                   {index < analysis.weak_concepts.length - 1 && <Divider />}
                 </React.Fragment>
               ))}
             </List>
 
-            <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  window.location.href = '/learning-path';
-                }}
-              >
-                View Learning Path
-              </Button>
+            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
               <Button
                 variant="outlined"
                 onClick={resetQuiz}
               >
-                Take Another Quiz
+                Start New Quiz
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => window.location.href = '/learning-path'}
+              >
+                View Learning Path
               </Button>
             </Box>
           </Box>
