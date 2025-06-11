@@ -46,6 +46,13 @@ const Quiz = () => {
         questions: response.data.quiz
       });
       setSelectedAnswers({});
+
+      // Extract and store unique concepts from questions
+      if (response.data.quiz) {
+        const uniqueConcepts = [...new Set(response.data.quiz.map(question => question.concept))];
+        localStorage.setItem('allConcepts', JSON.stringify(uniqueConcepts));
+        console.log('Stored concepts:', uniqueConcepts);
+      }
     } catch (error) {
       console.error('Error generating quiz:', error);
       console.error('Error details:', error.response?.data);
@@ -257,20 +264,128 @@ const Quiz = () => {
               );
             })}
 
-            <Alert severity="info" sx={{ mb: 3 }}>
-              Based on your performance, here are the concepts you should focus on:
-            </Alert>
+            <Box sx={{ mb: 4 }}>
+              <Paper 
+                elevation={1}
+                sx={{ 
+                  overflow: 'hidden',
+                  borderRadius: 2,
+                  border: '1px solid',
+                  borderColor: 'divider'
+                }}
+              >
+                <Box sx={{ 
+                  bgcolor: '',
+                  color: 'black',
+                  p: 3,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2
+                }}>
+                  <Box sx={{ 
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: 40,
+                    height: 40,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 'bold',
+                    boxShadow: 1
+                  }}>
+                    !
+                  </Box>
+                  <Box>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 500, 
+                      mb: 0.5, 
+                      color: 'black'
+                    }}>
+                      Areas for Improvement
+                    </Typography>
+                    <Typography variant="body2" sx={{ 
+                      color: 'black',
+                      opacity: 0.8
+                    }}>
+                      Based on your quiz performance, here are the key concepts you should focus on:
+                    </Typography>
+                  </Box>
+                </Box>
 
-            <List>
-              {analysis.weak_concepts?.map((concept, index) => (
-                <React.Fragment key={index}>
-                  <ListItem>
-                    <ListItemText primary={concept} />
-                  </ListItem>
-                  {index < analysis.weak_concepts.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
-            </List>
+                <List sx={{ p: 0 }}>
+                  {analysis.weak_concepts?.map((concept, index) => (
+                    <React.Fragment key={index}>
+                      <ListItem
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          py: 2.5,
+                          px: 3,
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            bgcolor: 'action.hover',
+                            transform: 'translateX(4px)'
+                          }
+                        }}
+                      >
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center',
+                          minWidth: '40px'
+                        }}>
+                          <Box sx={{
+                            bgcolor: 'background.paper',
+                            color: 'primary.main',
+                            borderRadius: '50%',
+                            width: 32,
+                            height: 32,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 'bold',
+                            fontSize: '1rem',
+                            border: '1px solid',
+                            borderColor: 'primary.main',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                          }}>
+                            {index + 1}
+                          </Box>
+                        </Box>
+                        <ListItemText
+                          primary={
+                            <Typography variant="subtitle1" sx={{ 
+                              fontWeight: 500,
+                              color: 'text.primary'
+                            }}>
+                              {concept}
+                            </Typography>
+                          }
+                          secondary={
+                            <Typography 
+                              variant="body2" 
+                              sx={{ 
+                                mt: 0.5,
+                                color: 'text.secondary',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.5
+                              }}
+                            >
+                              
+                              
+                            </Typography>
+                          }
+                        />
+                      </ListItem>
+                      {index < analysis.weak_concepts.length - 1 && (
+                        <Divider sx={{ mx: 3 }} />
+                      )}
+                    </React.Fragment>
+                  ))}
+                </List>
+              </Paper>
+            </Box>
 
             <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
               <Button
